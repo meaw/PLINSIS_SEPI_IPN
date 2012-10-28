@@ -1,0 +1,90 @@
+SUBROUTINE NORMALIZE_MAT(MAT)
+COMPLEX  MAT (3,3)
+DO I=1,3
+DO J=1,3
+IF ( REAL(MAT(I,J))>999.999) then
+MAT(I,J)=cmplx(999.999, aimag(MAT(I,J)))
+end if
+IF ( aimag(MAT(I,J))>999.999) then
+MAT(I,J)=cmplx( real(MAT(I,J)),999.999)
+end if
+
+IF ( REAL(MAT(I,J))<-999.999) then
+MAT(I,J)=cmplx(-999.999, aimag(MAT(I,J)))
+end if
+IF ( aimag(MAT(I,J))<-999.999) then
+MAT(I,J)=cmplx( real(MAT(I,J)),-999.999)
+end if
+
+IF (( REAL(MAT(I,J))>0.000000001) .and. ( REAL(MAT(I,J))<=0.00001)) then
+MAT(I,J)=cmplx(0.00001, aimag(MAT(I,J)))
+end if
+
+IF (( aimag(MAT(I,J))>0.000000001) .and. ( aimag(MAT(I,J))<=0.00001)) then
+MAT(I,J)=cmplx( real(MAT(I,J)) , 0.00001 )
+end if
+
+IF (( aimag(MAT(I,J))<-0.000000001) .and. ( aimag(MAT(I,J))>=-0.00001)) then
+MAT(I,J)=cmplx( real(MAT(I,J)) , -0.00001 )
+end if
+
+IF (( real(MAT(I,J))<-0.000000001) .and. ( real(MAT(I,J))>=-0.00001)) then
+MAT(I,J)=cmplx( -0.00001,aimag(MAT(I,J)) )
+end if
+
+END DO
+END DO
+END SUBROUTINE
+
+SUBROUTINE PROCESS_SOURCE(source)
+TYPE::SOURCE_STRUCTURE
+        SEQUENCE
+        character* 32 ::SOURCE_NAME
+        INTEGER       ::node_a
+        COMPLEX       ::V(3)
+        COMPLEX       ::Z(3,3)
+END TYPE SOURCE_STRUCTURE
+TYPE(SOURCE_structure) source
+COMPLEX A
+COMPLEX T(3,3),TT(3,3),Z_TEMP(3,3)
+
+A = CMPLX(-0.5,0.86602554)
+T=CMPLX(1,0)
+T(2,2)=A*A
+T(3,3)=A*A
+T(2,3)=A
+T(3,2)=A
+TT= CONJG(T)/3
+Z_TEMP=MATMUL(T,source%Z)
+source%Z=MATMUL( Z_TEMP,TT)
+call NORMALIZE_MAT(source%Z)
+
+end subroutine
+
+SUBROUTINE PROCESS_LINE(LINE,CAT_LINE,LENGTH)
+TYPE::LINEPARAMS_STRUCTURE
+        SEQUENCE
+        character* 32 :: LINE_NAME
+        COMPLEX       :: Z(3,3)
+END TYPE LINEPARAMS_STRUCTURE
+
+TYPE::CAT_LINEMOD_STRUCTURE
+        SEQUENCE
+        CHARACTER *32 ::LINEPARAM
+        REAL          ::LINE_VOLTAGE 
+        REAL          ::LENGTH 
+        COMPLEX       ::Z(3,3)
+END TYPE CAT_LINEMOD_STRUCTURE
+TYPE( CAT_LINEMOD_STRUCTURE)CAT_LINE
+
+TYPE( LINEPARAMS_STRUCTURE)LINE
+REAL LENGTH
+DO i=1,3
+DO J=1,3
+CAT_LINE%Z(I,J)=LENGTH*LINE%Z(I,J)/(CAT_LINE%LINE_VOLTAGE**2/100)  /1000 ! 1000 SON POR QUE LAS IMPEDANCIAS ESTAN EN OHM/ KM
+END DO
+END DO
+CAT_LINE%LENGTH=LENGTH
+CAT_LINE%LINEPARAM=LINE%LINE_NAME
+CALL NORMALIZE_MAT(CAT_LINE%Z)
+END SUBROUTINE

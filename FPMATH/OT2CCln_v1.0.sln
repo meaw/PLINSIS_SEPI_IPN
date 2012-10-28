@@ -1,0 +1,20 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "FPMATH", "Console2\FPMATH.vfproj", "{A798A098-B049-47EB-81DD-6A6C3C885DDF}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A798A098-B049-47EB-81DD-6A6C3C885DDF}.Debug|Win32.ActiveCfg = Debug|Win32
+		{A798A098-B049-47EB-81DD-6A6C3C885DDF}.Debug|Win32.Build.0 = Debug|Win32
+		{A798A098-B049-47EB-81DD-6A6C3C885DDF}.Release|Win32.ActiveCfg = Release|Win32
+		{A798A098-B049-47EB-81DD-6A6C3C885DDF}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
