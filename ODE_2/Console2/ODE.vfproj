@@ -3,7 +3,7 @@
 	<Platforms>
 		<Platform Name="Win32"/></Platforms>
 	<Configurations>
-		<Configuration Name="Debug|Win32" OutputDirectory="C:\TESIS\SHAREDDATA\" IntermediateDirectory="C:\TESIS\SHAREDDATA\TEMP">
+		<Configuration Name="Debug|Win32" OutputDirectory="C:\Users\David\Documents\GitHub\PLINSIS_SEPI_IPN\ODE_2\Console2\out" IntermediateDirectory="C:\Users\David\Documents\GitHub\PLINSIS_SEPI_IPN\ODE_2\Console2\tmp">
 				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" OpenMPConditionalCompilation="false" Interfaces="true" WarnInterfaces="true" Traceback="true" BoundsCheck="true" RuntimeLibrary="rtMultiThreadedDebug"/>
 				<Tool Name="VFLinkerTool" LinkIncremental="linkIncrementalNo" GenerateDebugInformation="true" SubSystem="subSystemConsole"/>
 				<Tool Name="VFResourceCompilerTool"/>

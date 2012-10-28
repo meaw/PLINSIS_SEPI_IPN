@@ -78,7 +78,7 @@ subroutine writer(i,x_1_i, x_2_i, x_3_i,t)
 10 format ((f16.6),',',(f16.6),',',(f16.6),',',(f16.6))
  real*16 x_1_i, x_2_i, x_3_i, t
  integer*8 i;
-if (mod(i,5000) .eq. 0) then
+if (mod(i,500) .eq. 0) then
 write(100,10)t,x_1_i,x_2_i,x_3_i
 end if 
 end subroutine
@@ -107,10 +107,10 @@ x_1_i=x_1
 x_2_i=x_2
 x_3_i=x_3
 
-h=.000001Q0
+h=.00001Q0
 
 open (100, FILE='datos.csv')
-do i=1,10000000
+do i=1,1000000
   t=h*i
 !  call solve_euler(x_1_i, x_2_i, x_3_i,t,h)
   call solve_rk4(x_1_i, x_2_i, x_3_i,t,h)
