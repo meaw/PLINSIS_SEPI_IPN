@@ -23,6 +23,30 @@ end function
 
 
 
+subroutine solve_euler_trap(x_1_i, x_2_i, x_3_i,t,h)
+ real*16 f1,f2,f3
+real*16, INTENT(INOUT)::  x_1_i, x_2_i, x_3_i
+real*16 x_1_o, x_2_o, x_3_o
+real*16 x_1_t, x_2_t, x_3_t
+real*16, INTENT(IN):: t,h
+real*16 hhalf
+hhalf=h/2.0Q0
+ 
+   x_1_t=x_1_i+hhalf*f1(x_1_i,x_2_i,x_3_i,t);
+   x_2_t=x_2_i+hhalf*f2(x_1_i,x_2_i,x_3_i,t);
+   x_3_t=x_3_i+hhalf*f3(x_1_i,x_2_i,x_3_i,t);
+
+ 
+   x_1_o=h*f1(x_1_t,x_2_t,x_3_t,t+hhalf);
+   x_2_o=h*f2(x_1_t,x_2_t,x_3_t,t+hhalf);
+   x_3_o=h*f3(x_1_t,x_2_t,x_3_t,t+hhalf);
+   
+   x_1_i=x_1_i+x_1_o
+   x_2_i=x_2_i+x_2_o
+   x_3_i=x_3_i+x_3_o
+
+end subroutine
+
 subroutine solve_euler(x_1_i, x_2_i, x_3_i,t,h)
  real*16 f1,f2,f3
 real*16, INTENT(INOUT)::  x_1_i, x_2_i, x_3_i
@@ -38,6 +62,81 @@ real*16, INTENT(IN):: t,h
 
 end subroutine
 
+subroutine solve_euler_mod(x_1_i, x_2_i, x_3_i,t,h)   
+ real*16 f1,f2,f3
+real*16, INTENT(INOUT)::  x_1_i, x_2_i, x_3_i
+real*16 x_1_t1, x_2_t1, x_3_t1
+real*16, INTENT(IN):: t,h
+ x_1_t1=f1(x_1_i,x_2_i,x_3_i,t);
+ x_2_t1=f2(x_1_i,x_2_i,x_3_i,t);
+  x_3_t1=f3(x_1_i,x_2_i,x_3_i,t);
+
+ x_1_o=1.0Q0/2.0Q0*h*(x_1_t1+f1(x_1_i+x_1_t1*h ,x_2_i+x_2_t1*h,x_3_i+x_3_t1*h,t+h))
+ 
+
+ x_2_o=1.0Q0/2.0Q0*h*(x_2_t1+f1(x_1_i+x_1_t1*h ,x_2_i+x_2_t1*h*h,x_3_i+x_3_t1*h,t+h)*h)
+ 
+
+ x_3_o=1.0Q0/2.0Q0*h*(x_3_t1+f1(x_1_i+x_1_t1*h ,x_2_i+x_2_t1*h,x_3_i+x_3_t1*h,t+h)*h)
+ 
+ 
+
+   x_1_i=x_1_i+x_1_o
+   x_2_i=x_2_i+x_2_o
+   x_3_i=x_3_i+x_3_o
+
+end subroutine
+
+
+
+subroutine solve_euler_implicit(x_1_i, x_2_i, x_3_i,t,h)
+ real*16 f1,f2,f3
+real*16, INTENT(INOUT)::  x_1_i, x_2_i, x_3_i
+real*16 x_1_o, x_2_o, x_3_o
+
+real*16, INTENT(IN):: t,h
+real*16 tol,y_kp,y_k,xval
+integer*8 max_iter,itern
+max_iter=2000;
+
+        tol=h/10000Q0;
+        y_k=x_1_i;
+        y_kp=x_1_i;
+        do itern=1 , max_iter
+            xval=y_k+h*(f1(y_kp,x_2_i,x_3_i,t + h))
+             if (abs(xval - y_kp)<tol) then
+                    x_1_o=xval
+                   goto 2
+             end if
+            y_kp=xval
+        end do
+        x_1_o=xval;
+    2   y_k=x_2_i;
+        y_kp=x_2_i;
+        do itern=1 , max_iter
+            xval=y_k+h*(f2(x_1_i,y_kp,x_3_i,t + h))
+             if (abs(xval - y_kp)<tol) then
+                    x_2_o=xval
+                   goto 3
+             end if
+            y_kp=xval
+        end do
+        x_2_o=xval
+    3   y_k=x_3_i;
+        y_kp=x_3_i;
+        do itern=1 , max_iter
+            xval=y_k+h*(f3(x_1_i,x_2_i,y_kp,t + h))
+             if (abs(xval - y_kp)<tol) then
+                    x_3_o=xval
+                   goto 4
+             end if
+            y_kp=xval
+        end do
+        x_3_o=xval
+    4   x_1_i=x_1_o;
+     x_2_i=x_2_o;
+      x_3_i=x_3_o;
+end subroutine
 
 subroutine solve_rk4(x_1_i, x_2_i, x_3_i,t1,h)
  real*16 f1,f2,f3
@@ -48,7 +147,7 @@ real*16, INTENT(IN):: t1,h
 real*16 hhalf,t
 
 hhalf=h/2.0Q0;
-t=t1-h;
+t=t1;
  a=f1(x_1_i,x_2_i,x_3_i,t);
  b=f1(x_1_i+hhalf*a,x_2_i+hhalf*a,x_3_i+hhalf*a,t+hhalf);
  c=f1(x_1_i+hhalf*b,x_2_i+hhalf*b,x_3_i+hhalf*b,t+hhalf);
@@ -111,10 +210,12 @@ h=.00001Q0
 
 open (100, FILE='datos.csv')
 do i=1,1000000
-  t=h*i
+  t=h*(i-1);
 !  call solve_euler(x_1_i, x_2_i, x_3_i,t,h)
-  call solve_rk4(x_1_i, x_2_i, x_3_i,t,h)
- 
+!  call solve_rk4(x_1_i, x_2_i, x_3_i,t,h)
+ !call solve_euler_mod(x_1_i, x_2_i, x_3_i,t,h)    !!verificarlo
+ !call solve_euler_implicit(x_1_i, x_2_i, x_3_i,t,h)
+ call solve_euler_trap(x_1_i, x_2_i, x_3_i,t,h)
   call writer(i,x_1_i, x_2_i, x_3_i,t)
 end do
 close (100,STATUS='KEEP')
