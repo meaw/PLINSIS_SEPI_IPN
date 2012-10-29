@@ -78,13 +78,13 @@ real*16, INTENT(IN):: t,h
  x_2_t1=f2(x_1_i,x_2_i,x_3_i,t);
   x_3_t1=f3(x_1_i,x_2_i,x_3_i,t);
 
- x_1_o=1.0Q0/2.0Q0*h*(x_1_t1+f1(x_1_i+x_1_t1*h ,x_2_i+x_2_t1*h,x_3_i+x_3_t1*h,t+h))
+ x_1_o=1.0Q0/2.0Q0*h*(x_1_t1+f1(x_1_i+x_1_t1*h ,x_2_i+x_2_t1*h,x_3_i+x_3_t1*h,t+h)*h)
  
 
- x_2_o=1.0Q0/2.0Q0*h*(x_2_t1+f1(x_1_i+x_1_t1*h ,x_2_i+x_2_t1*h*h,x_3_i+x_3_t1*h,t+h)*h)
+ x_2_o=1.0Q0/2.0Q0*h*(x_2_t1+f2(x_1_i+x_1_t1*h ,x_2_i+x_2_t1*h,x_3_i+x_3_t1*h,t+h)*h)
  
 
- x_3_o=1.0Q0/2.0Q0*h*(x_3_t1+f1(x_1_i+x_1_t1*h ,x_2_i+x_2_t1*h,x_3_i+x_3_t1*h,t+h)*h)
+ x_3_o=1.0Q0/2.0Q0*h*(x_3_t1+f3(x_1_i+x_1_t1*h ,x_2_i+x_2_t1*h,x_3_i+x_3_t1*h,t+h)*h)
  
  
 
@@ -313,7 +313,89 @@ max_iter=2000;
 end subroutine
 
 
+subroutine solve_gear2(x_1_i, x_2_i, x_3_i,t,h,size)
+IMPLICIT NONE
+ real*16 f1,f2,f3
+ integer size
+real*16, INTENT(INOUT)::  x_1_i(size), x_2_i(size), x_3_i(size)
+real*16 x_1_o, x_2_o, x_3_o
 
+real*16, INTENT(IN):: t,h
+real*16 tol,y_kp_1,y_kp_3,y_kp_2,y_k,xval,y_kp_1_o,y_kp_3_o,y_kp_2_o
+integer*8 max_iter,itern,iternj,j
+max_iter=2000;
+
+
+        tol=h/10000Q0;
+      
+        y_kp_1=x_1_i(4);
+        y_kp_2=x_2_i(4);
+        y_kp_3=x_3_i(4);
+        
+        y_kp_1_o=y_kp_1+1
+         y_kp_2_o=y_kp_1+1
+          y_kp_3_o=y_kp_1+1
+        do iternj=1 , max_iter
+        
+        
+        
+         if( (abs(y_kp_1_o - y_kp_1)<tol) .and. (abs(y_kp_2_o - y_kp_2)<tol) .and. (abs(y_kp_3_o - y_kp_3)<tol)) then
+         
+         j=j
+         exit
+         
+         end if
+        
+         y_kp_1_o=y_kp_1
+         y_kp_2_o=y_kp_2
+         y_kp_3_o=y_kp_3
+         
+           y_k=x_1_i(4);
+        do itern=1 , max_iter
+            xval=h*2.0Q0/3.0Q0*f1(y_kp_1,y_kp_2,y_kp_3,t + h)+4.0Q0/3.0Q0*f1(x_1_i(4),x_2_i(4),x_3_i(4),t )-1.0Q0/3.0Q0*f1(x_1_i(3),x_2_i(3),x_3_i(3),t - h)
+             if (abs(xval - y_kp_1)<tol) then
+             y_kp_1=xval
+                    x_1_o=xval
+                   goto 2
+             end if
+            y_kp_1=xval
+        end do
+        x_1_o=xval;
+    2   y_k=x_2_i(4);
+        do itern=1 , max_iter
+            xval=h*2.0Q0/3.0Q0*f2(y_kp_1,y_kp_2,y_kp_3,t + h)+4.0Q0/3.0Q0*f2(x_1_i(4),x_2_i(4),x_3_i(4),t )-1.0Q0/3.0Q0*f2(x_1_i(3),x_2_i(3),x_3_i(3),t - h)
+            
+             if (abs(xval - y_kp_2)<tol) then
+             y_kp_2=xval
+                    x_2_o=xval
+                   goto 3
+             end if
+             y_kp_2=xval
+        end do
+        x_2_o=xval
+    3   y_k=x_3_i(4);
+        do itern=1 , max_iter
+        
+        
+            xval=(2.0Q0/3.0Q0)*h*f3(y_kp_1,y_kp_2,y_kp_3,t + h)+(4.0Q0/3.0Q0)*f3(x_1_i(4),x_2_i(4),x_3_i(4),t )-(1.0Q0/3.0Q0)*f3(x_1_i(3),x_2_i(3),x_3_i(3),t - h)
+       
+             if (abs(xval - y_kp_3)<tol) then
+             y_kp_3=xval
+                    x_3_o=xval
+                   goto 4
+             end if
+            y_kp_3=xval
+        end do
+        x_3_o=xval
+    4 j=j
+    
+      end do
+     call rotate(x_1_i, x_2_i, x_3_i,size)
+    
+     x_1_i(4)=x_1_o;
+     x_2_i(4)=x_2_o;
+      x_3_i(4)=x_3_o;
+end subroutine
 
 
 
@@ -356,7 +438,12 @@ t=t1;
 
 end subroutine
 
-
+subroutine solve_gear1(x_1_i, x_2_i, x_3_i,t1,h)
+IMPLICIT NONE
+real*16, INTENT(INOUT)::  x_1_i, x_2_i, x_3_i
+real*16, INTENT(IN):: t1,h
+call solve_euler_implicit(x_1_i, x_2_i, x_3_i,t1,h)
+end subroutine
 
 subroutine solve_rk4(x_1_i, x_2_i, x_3_i,t1,h)
 IMPLICIT NONE
@@ -458,33 +545,34 @@ do i=1,1000000
   t=h*(i-1);
 !  call solve_euler(x_1_i, x_2_i, x_3_i,t,h)
   !call solve_rk4(x_1_i(4), x_2_i(4), x_3_i(4),t,h)
- !call solve_euler_mod(x_1_i, x_2_i, x_3_i,t,h)    !!verificarlo
+call solve_euler_mod(x_1_i(4), x_2_i(4), x_3_i(4),t,h)    !!verificarlo
 ! call solve_euler_implicit(x_1_i(4), x_2_i(4), x_3_i(4),t,h)
 ! call solve_euler_trap(x_1_i, x_2_i, x_3_i,t,h)
  !call solve_trap(x_1_i(4), x_2_i(4), x_3_i(4),t,h) 
- call solve_rkm(x_1_i(4), x_2_i(4), x_3_i(4),t,h)
+! call solve_rkm(x_1_i(4), x_2_i(4), x_3_i(4),t,h)
  call writer(i,x_1_i(4), x_2_i(4), x_3_i(4),t)
 end do
 
-!  t=h*(0);
-!  call rotate(x_1_i, x_2_i, x_3_i,4)
-!call solve_euler_implicit(x_1_i(4), x_2_i(4), x_3_i(4),t,h)
-!
-!  t=h*(1);
-!  call rotate(x_1_i, x_2_i, x_3_i,4)
-!call solve_euler_implicit(x_1_i(4), x_2_i(4), x_3_i(4),t,h)
-!
-!  t=h*(2);
-!  call rotate(x_1_i, x_2_i, x_3_i,4)
-!call solve_euler_implicit(x_1_i(4), x_2_i(4), x_3_i(4),t,h)
-!
-!
-!do i=4,1000000
-!  t=h*(i-1);
+  t=h*(0);
+  call rotate(x_1_i, x_2_i, x_3_i,4)
+call solve_euler_implicit(x_1_i(4), x_2_i(4), x_3_i(4),t,h)
+
+  t=h*(1);
+  call rotate(x_1_i, x_2_i, x_3_i,4)
+call solve_euler_implicit(x_1_i(4), x_2_i(4), x_3_i(4),t,h)
+
+  t=h*(2);
+  call rotate(x_1_i, x_2_i, x_3_i,4)
+call solve_euler_implicit(x_1_i(4), x_2_i(4), x_3_i(4),t,h)
+
+
+do i=4,1000000
+  t=h*(i-1);
 !call solve_am4(x_1_i, x_2_i, x_3_i,t,h,4) 
-! 
+ !call solve_gear1(x_1_i(4), x_2_i(4), x_3_i(4),t,h) 
+! call solve_gear2(x_1_i, x_2_i, x_3_i,t,h,4) 
 !call writer(i,x_1_i(4), x_2_i(4), x_3_i(4),t)
-!end do
+end do
 
 
 
