@@ -40,7 +40,7 @@ end function
 common /solver_data/solving_set
 xr=0;
  if (solving_set .eq. 2) then 
-xr=-x1*cos(t)+x3
+xr=-x1*Qcos(t)+x3
 end if
  if (solving_set .eq. 3) then 
 xr=1.0Q0/2.0Q0*x1+2.0Q0*x2+t
@@ -62,7 +62,7 @@ common /solver_data/solving_set
  xr=0;
  
   if (solving_set .eq. 2) then 
-xr=t*t +x1*(x1*sin(x1+t)+(t*t-1.0Q0))
+xr=t*t +x1*(x1*Qsin(x1+t)+(t*t-1.0Q0))
 end if
 f3=xr
 end function
@@ -200,93 +200,136 @@ real*16, INTENT(IN):: t,h
 end subroutine
 
 
-
-
 subroutine solve_trap(x_1_i, x_2_i, x_3_i,x_4_i, x_5_i, x_6_i,t,h)
+
+
 IMPLICIT NONE
+
+
  real*16 f1,f2,f3,f4,f5,f6
 real*16, INTENT(INOUT)::  x_1_i, x_2_i, x_3_i,x_4_i, x_5_i, x_6_i
 real*16 x_1_o, x_2_o, x_3_o, x_4_o, x_5_o, x_6_o
 
 real*16, INTENT(IN):: t,h
-real*16 tol,y_kp,y_k,xval
-integer*8 max_iter,itern
-max_iter=2000;
+real*16 tol,y_kp,y_k,xval,y_kp_1,y_kp_2,y_kp_3,y_kp_4,y_kp_5,y_kp_6,y_kp_1_o,y_kp_2_o,y_kp_3_o,y_kp_4_o,y_kp_5_o,y_kp_6_o,toll
+integer*8 max_iter,itern,iternj,j
 
-     tol=1e-9;
+
+ integer*4 solving_set
+common /solver_data/solving_set
+
+
+max_iter=2000;
+        tol=1e-9;
+        toll=1e-7;
+        y_kp_1=x_1_i
+        y_kp_2=x_2_i
+        y_kp_3=x_3_i
+        y_kp_4=x_4_i
+        y_kp_5=x_5_i
+        y_kp_6=x_6_i
+        
+        y_kp_1_o=y_kp_1+1
+         y_kp_2_o=y_kp_2+1
+          y_kp_3_o=y_kp_3+1
+          
+            y_kp_4_o=y_kp_4+1
+         y_kp_5_o=y_kp_5+1
+          y_kp_6_o=y_kp_6+1
+          
+          
+        do iternj=1 , 10
+        
+        
+        
+         if( (abs(y_kp_1_o - y_kp_1)<toll) .and. (abs(y_kp_2_o - y_kp_2)<toll) .and. (abs(y_kp_3_o - y_kp_3)<toll) .and. (abs(y_kp_4_o - y_kp_4)<toll) .and. (abs(y_kp_5_o - y_kp_5)<toll) .and. (abs(y_kp_6_o - y_kp_6)<toll)) then
+         
+         j=j
+         exit
+         
+         end if
+        
+         y_kp_1_o=y_kp_1
+         y_kp_2_o=y_kp_2
+         y_kp_3_o=y_kp_3
+         y_kp_4_o=y_kp_4
+         y_kp_5_o=y_kp_5
+         y_kp_6_o=y_kp_6
+
+
         y_k=x_1_i;
-        y_kp=x_1_i;
+       
         do itern=1 , max_iter
-            xval=y_k+h/2.0Q0*(f1(y_kp,x_2_i,x_3_i,x_4_i, x_5_i, x_6_i,t + h)+f1(x_1_i,x_2_i,x_3_i,x_4_i, x_5_i, x_6_i,t))
-             if (abs(xval - y_kp)<tol) then
-                    x_1_o=xval
+            xval=y_k+h/2.0Q0*(f1(y_kp_1,y_kp_2,y_kp_3,y_kp_4, y_kp_5, y_kp_6,t + h)+f1(x_1_i,x_2_i,x_3_i,x_4_i, x_5_i, x_6_i,t))
+            if (solving_set==4) then 
+          y_kp_1=(50*h*sin(t+h)+50*h*sin(t)-y_k*(50*h-1))/(50*h+1)
+            xval=y_kp_1;
+            end if
+            
+             if (abs(xval - y_kp_1)<tol) then
+                  y_kp_1=xval
+                   
                    goto 2
              end if
-            y_kp=xval
+            y_kp_1=xval
         end do
-        x_1_o=xval;
+
+        
     2   y_k=x_2_i;
-        y_kp=x_2_i;
+       
         do itern=1 , max_iter
-            xval=y_k+h/2.0Q0*(f2(x_1_i,y_kp,x_3_i,x_4_i, x_5_i, x_6_i,t + h)+f2(x_1_i,x_2_i,x_3_i,x_4_i, x_5_i, x_6_i,t))
-             if (abs(xval - y_kp)<tol) then
-                    x_2_o=xval
+            xval=y_k+h/2.0Q0*(f2(y_kp_1,y_kp_2,y_kp_3,y_kp_4, y_kp_5, y_kp_6,t + h)+f2(x_1_i,x_2_i,x_3_i,x_4_i, x_5_i, x_6_i,t))
+             if (abs(xval - y_kp_2)<tol) then
+              y_kp_2=xval
                    goto 3
              end if
-            y_kp=xval
+             y_kp_2=xval
         end do
-        x_2_o=xval
+
     3   y_k=x_3_i;
-        y_kp=x_3_i;
         do itern=1 , max_iter
-            xval=y_k+(h/2.0Q0)*(f3(x_1_i,x_2_i,y_kp,x_4_i, x_5_i, x_6_i,t + h)+f3(x_1_i,x_2_i,x_3_i,x_4_i, x_5_i, x_6_i,t))
-             if (abs(xval - y_kp)<tol) then
-                    x_3_o=xval
+            xval=y_k+(h/2.0Q0)*(f3(y_kp_1,y_kp_2,y_kp_3,y_kp_4, y_kp_5, y_kp_6,t + h)+f3(x_1_i,x_2_i,x_3_i,x_4_i, x_5_i, x_6_i,t))
+             if (abs(xval - y_kp_3)<tol) then
+                    y_kp_3=xval
                    goto 4
              end if
-            y_kp=xval
+            y_kp_3=xval
         end do
-        x_3_o=xval
     4    y_k=x_4_i;
-        y_kp=x_4_i;
         do itern=1 , max_iter
-            xval=y_k+(h/2.0Q0)*(f4(x_1_i,x_2_i,x_3_i,y_kp, x_5_i, x_6_i,t + h)+f4(x_1_i,x_2_i,x_3_i,x_4_i, x_5_i, x_6_i,t))
-             if (abs(xval - y_kp)<tol) then
-                    x_4_o=xval
+            xval=y_k+(h/2.0Q0)*(f4(y_kp_1,y_kp_2,y_kp_3,y_kp_4, y_kp_5, y_kp_6,t + h)+f4(x_1_i,x_2_i,x_3_i,x_4_i, x_5_i, x_6_i,t))
+             if (abs(xval - y_kp_4)<tol) then
+                    y_kp_4=xval
                    goto 5
              end if
-            y_kp=xval
+            y_kp_4=xval
         end do
-        x_4_o=xval
  5      y_k=x_5_i;
-        y_kp=x_5_i;
         do itern=1 , max_iter
-            xval=y_k+(h/2.0Q0)*(f5(x_1_i,x_2_i,x_3_i, x_4_i,y_kp, x_6_i,t + h)+f5(x_1_i,x_2_i,x_3_i,x_4_i, x_5_i, x_6_i,t))
-             if (abs(xval - y_kp)<tol) then
-                    x_5_o=xval
+            xval=y_k+(h/2.0Q0)*(f5(y_kp_1,y_kp_2,y_kp_3,y_kp_4, y_kp_5, y_kp_6,t + h)+f5(x_1_i,x_2_i,x_3_i,x_4_i, x_5_i, x_6_i,t))
+             if (abs(xval - y_kp_5)<tol) then
+                    y_kp_5=xval
                    goto 6
              end if
-            y_kp=xval
+            y_kp_5=xval
         end do
-        x_5_o=xval
-        
  6      y_k=x_6_i;
-        y_kp=x_6_i;
         do itern=1 , max_iter
-            xval=y_k+(h/2.0Q0)*(f6(x_1_i,x_2_i,x_3_i, x_4_i, x_5_i,y_kp,t + h)+f6(x_1_i,x_2_i,x_3_i,x_4_i, x_5_i, x_6_i,t))
-             if (abs(xval - y_kp)<tol) then
-                    x_6_o=xval
+            xval=y_k+(h/2.0Q0)*(f6(y_kp_1,y_kp_2,y_kp_3,y_kp_4, y_kp_5, y_kp_6,t + h)+f6(x_1_i,x_2_i,x_3_i,x_4_i, x_5_i, x_6_i,t))
+             if (abs(xval - y_kp_6)<tol) then
+                    y_kp_6=xval
                    goto 7
              end if
-            y_kp=xval
+            y_kp_6=xval
         end do
-        x_6_o=xval
-   7     x_1_i=x_1_o;
-     x_2_i=x_2_o;
-      x_3_i=x_3_o;
-      x_4_i=x_4_o;
-     x_5_i=x_5_o;
-      x_6_i=x_6_o;
+   7   j=j
+   end do
+     x_1_i=y_kp_1;
+     x_2_i=y_kp_2;
+      x_3_i=y_kp_3;
+      x_4_i=y_kp_4;
+     x_5_i=y_kp_5;
+      x_6_i=y_kp_6;
 end subroutine
 
 subroutine solve_euler_implicit(x_1_i, x_2_i, x_3_i,x_4_i, x_5_i, x_6_i,t,h)
@@ -296,12 +339,14 @@ real*16, INTENT(INOUT)::  x_1_i, x_2_i, x_3_i,x_4_i, x_5_i, x_6_i
 real*16 x_1_o, x_2_o, x_3_o,x_4_o, x_5_o, x_6_o
 
 real*16, INTENT(IN):: t,h
-real*16 tol,y_kp_1,y_kp_3,y_kp_2,y_kp_4,y_kp_5,y_kp_6,y_k,xval,y_kp_1_o,y_kp_3_o,y_kp_2_o,y_kp_4_o,y_kp_5_o,y_kp_6_o
+real*16 tol,y_kp_1,y_kp_3,y_kp_2,y_kp_4,y_kp_5,y_kp_6,y_k,xval,y_kp_1_o,y_kp_3_o,y_kp_2_o,y_kp_4_o,y_kp_5_o,y_kp_6_o,toll,tmp
 integer*8 max_iter,itern,iternj,j
-max_iter=2000;
 
-     tol=1e-9;
-        
+ integer*4 solving_set
+common /solver_data/solving_set
+max_iter=2000;
+     tol=1e-8;
+             toll=1e-5;
           y_kp_1=x_1_i;
         y_kp_2=x_2_i;
         y_kp_3=x_3_i;
@@ -318,11 +363,11 @@ max_iter=2000;
           y_kp_6_o=y_kp_6+1
           
           
-        do iternj=1 , max_iter
+        do iternj=1 , 10
         
         
         
-         if( (abs(y_kp_1_o - y_kp_1)<tol) .and. (abs(y_kp_2_o - y_kp_2)<tol) .and. (abs(y_kp_3_o - y_kp_3)<tol) .and. (abs(y_kp_4_o - y_kp_4)<tol) .and. (abs(y_kp_5_o - y_kp_5)<tol) .and. (abs(y_kp_6_o - y_kp_6)<tol)) then
+         if( (abs(y_kp_1_o - y_kp_1)<toll) .and. (abs(y_kp_2_o - y_kp_2)<toll) .and. (abs(y_kp_3_o - y_kp_3)<toll) .and. (abs(y_kp_4_o - y_kp_4)<toll) .and. (abs(y_kp_5_o - y_kp_5)<toll) .and. (abs(y_kp_6_o - y_kp_6)<toll)) then
          
          j=j
          exit
@@ -332,14 +377,21 @@ max_iter=2000;
          y_kp_1_o=y_kp_1
          y_kp_2_o=y_kp_2
          y_kp_3_o=y_kp_3
-           y_kp_4_o=y_kp_4
+         y_kp_4_o=y_kp_4
          y_kp_5_o=y_kp_5
          y_kp_6_o=y_kp_6
          
         
         y_k=x_1_i;
         do itern=1 , max_iter
-            xval=y_k+h*(f1(y_kp_1,y_kp_2,y_kp_3,y_kp_4,y_kp_5,y_kp_6,t + h))
+           xval=y_k+h*(f1(y_kp_1,y_kp_2,y_kp_3,y_kp_4,y_kp_5,y_kp_6,t + h))
+         if (solving_set==4) then 
+        y_kp_1=(100*h*sin(t+h)+y_k)/(100*h+1)
+         xval=y_kp_1;
+        end if
+        
+        
+       
              if (abs(xval - y_kp_1)<tol) then
              y_kp_1=xval
                    goto 2
@@ -413,6 +465,10 @@ real*16 x_1_o, x_2_o, x_3_o,x_4_o, x_5_o, x_6_o
 real*16, INTENT(IN):: t,h
 real*16 tol,y_kp_1,y_kp_3,y_kp_2,y_kp_4,y_kp_5,y_kp_6,y_k,xval,y_kp_1_o,y_kp_3_o,y_kp_2_o,y_kp_4_o,y_kp_5_o,y_kp_6_o
 integer*8 max_iter,itern,iternj,j
+
+ integer*4 solving_set
+common /solver_data/solving_set
+
 max_iter=2000;
 
 
@@ -431,7 +487,7 @@ max_iter=2000;
           y_kp_4_o=y_kp_4+1
          y_kp_5_o=y_kp_5+1
           y_kp_6_o=y_kp_6+1
-        do iternj=1 , max_iter
+        do iternj=1 , 10
         
         
         
@@ -454,6 +510,12 @@ max_iter=2000;
            y_k=x_1_i(4);
         do itern=1 , max_iter
             xval=y_k+h/24.0Q0*(9.0Q0*f1(y_kp_1,y_kp_2,y_kp_3,y_kp_4,y_kp_5,y_kp_6,t + h)+19.0Q0*f1(x_1_i(4),x_2_i(4),x_3_i(4),x_4_i(4),x_5_i(4),x_6_i(4),t )-5.0Q0*f1(x_1_i(3),x_2_i(3),x_3_i(3),x_4_i(3),x_5_i(3),x_6_i(3),t - h)+1.0Q0*f1(x_1_i(2),x_2_i(2),x_3_i(2),x_4_i(2),x_5_i(2),x_6_i(2),t -h-h))
+         
+         if (solving_set==4) then
+                  y_kp_1=-(125*h*sin(t-h)-25*h*sin(t-2*h)-225*h*sin(t+h)-475*h*sin(t)+y_k*(475*h-6)-25*(5*x_1_i(3)-x_1_i(2))*h)/(3*(75*h+2));
+                 
+                    xval=y_kp_1
+                    end if
              if (abs(xval - y_kp_1)<tol) then
              y_kp_1=xval
                     x_1_o=xval
@@ -898,9 +960,9 @@ x_5=0.0Q0 !2.2
 x_6=0.0Q0
 ttime=0.0Q0
 
-solving_set=2
-h=.001Q0
-root='P2\0,001\'
+solving_set=1
+h=0.001Q0
+root='P1\0,001\'
 
 
 
@@ -923,7 +985,7 @@ x_2=1.0Q0  !1.1
 ttime=2.0Q0
 end if
 if (solving_set==4) then
-x_1=0.0Q0  !1.1
+x_1=0.0Q0  !1.1}
 ttime=4.0Q0
 end if
 if (solving_set==5) then
