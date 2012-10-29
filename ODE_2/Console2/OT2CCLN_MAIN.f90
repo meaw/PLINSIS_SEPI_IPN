@@ -327,27 +327,27 @@ real*16, INTENT(INOUT)::  x_1_i, x_2_i, x_3_i
 real*16 x_1_o, x_2_o, x_3_o
 real*16 c, b, a,d
 real*16, INTENT(IN):: t1,h
-real*16 hhalf,t
+real*16 half,t
 
-hhalf=h/2.0Q0;
+half=1/2.0Q0;
 t=t1;
- a=f1(x_1_i,x_2_i,x_3_i,t);
- b=f1(x_1_i+hhalf*a,x_2_i+hhalf*a,x_3_i+hhalf*a,t+hhalf);
- c=f1(x_1_i+hhalf*b,x_2_i+hhalf*b,x_3_i+hhalf*b,t+hhalf);
- d=f1(x_1_i+c,x_2_i+c,x_3_i+c,t+h);
- x_1_o=1.0Q0/6.0Q0*h*(a+b+c+d)
+ a=h*f1(x_1_i,x_2_i,x_3_i,t);
+ b=h*f1(x_1_i+half*a,x_2_i,x_3_i,t+half*h);
+ c=h*f1(x_1_i+half*b,x_2_i,x_3_i,t+half*h);
+ d=h*f1(x_1_i+c,x_2_i,x_3_i,t+h);
+ x_1_o=1.0Q0/6.0Q0*(a+2.0Q0*b+2.0Q0*c+d)
 
- a=f2(x_1_i,x_2_i,x_3_i,t);
- b=f2(x_1_i+hhalf*a,x_2_i+hhalf*a,x_3_i+hhalf*a,t+hhalf);
- c=f2(x_1_i+hhalf*b,x_2_i+hhalf*b,x_3_i+hhalf*b,t+hhalf);
- d=f2(x_1_i+c,x_2_i+c,x_3_i+c,t+h);
- x_2_o=1.0Q0/6.0Q0*h*(a+b+c+d)
+ a=h*f2(x_1_i,x_2_i,x_3_i,t);
+ b=h*f2(x_1_i,x_2_i+half*a,x_3_i,t+half*h);
+ c=h*f2(x_1_i,x_2_i+half*b,x_3_i,t+half*h);
+ d=h*f2(x_1_i,x_2_i+c,x_3_i,t+h);
+ x_2_o=1.0Q0/6.0Q0*(a+2.0Q0*b+2.0Q0*c+d)
  
-  a=f3(x_1_i,x_2_i,x_3_i,t);
- b=f3(x_1_i+hhalf*a,x_2_i+hhalf*a,x_3_i+hhalf*a,t+hhalf);
- c=f3(x_1_i+hhalf*b,x_2_i+hhalf*b,x_3_i+hhalf*b,t+hhalf);
- d=f3(x_1_i+c,x_2_i+c,x_3_i+c,t+h);
- x_3_o=1.0Q0/6.0Q0*h*(a+b+c+d)
+ a=h*f3(x_1_i,x_2_i,x_3_i,t);
+ b=h*f3(x_1_i,x_2_i,x_3_i+half*a,t+half*h);
+ c=h*f3(x_1_i,x_2_i,x_3_i+half*b,t+half*h);
+ d=h*f3(x_1_i,x_2_i,x_3_i+c,t+h);
+ x_3_o=1.0Q0/6.0Q0*(a+2.0Q0*b+2.0Q0*c+d)
  
    x_1_i=x_1_i+x_1_o
    x_2_i=x_2_i+x_2_o
@@ -419,9 +419,9 @@ open (100, FILE='datos.csv')
 do i=1,1000000
   t=h*(i-1);
 !  call solve_euler(x_1_i, x_2_i, x_3_i,t,h)
-!  call solve_rk4(x_1_i, x_2_i, x_3_i,t,h)
+  call solve_rk4(x_1_i(4), x_2_i(4), x_3_i(4),t,h)
  !call solve_euler_mod(x_1_i, x_2_i, x_3_i,t,h)    !!verificarlo
- call solve_euler_implicit(x_1_i(4), x_2_i(4), x_3_i(4),t,h)
+! call solve_euler_implicit(x_1_i(4), x_2_i(4), x_3_i(4),t,h)
 ! call solve_euler_trap(x_1_i, x_2_i, x_3_i,t,h)
  !call solve_trap(x_1_i(4), x_2_i(4), x_3_i(4),t,h) 
  
