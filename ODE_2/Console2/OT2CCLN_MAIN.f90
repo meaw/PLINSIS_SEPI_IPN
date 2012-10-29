@@ -317,6 +317,44 @@ end subroutine
 
 
 
+subroutine solve_rkm(x_1_i, x_2_i, x_3_i,t1,h)
+IMPLICIT NONE
+ real*16 f1,f2,f3
+real*16, INTENT(INOUT)::  x_1_i, x_2_i, x_3_i
+real*16 x_1_o, x_2_o, x_3_o
+real*16 c, b, a,d,e
+real*16, INTENT(IN):: t1,h
+real*16 half,t
+
+half=1/2.0Q0;
+t=t1;
+ a=h*f1(x_1_i,x_2_i,x_3_i,t);
+ b=h*f1(x_1_i+1.0Q0/3.0Q0*a,x_2_i,x_3_i,t+1.0Q0/3.0Q0*h);
+ c=h*f1(x_1_i+1.0Q0/6.0Q0*(a+b),x_2_i,x_3_i,t+1.0Q0/3.0Q0*h);
+ d=h*f1(x_1_i+1.0Q0/8.0Q0*(a+3.0Q0*c),x_2_i,x_3_i,t+1.0Q0/2.0Q0*h);
+ e=h*f1(x_1_i+1.0Q0/2.0Q0*(a-3.0Q0*c+4*d),x_2_i,x_3_i,t+h);
+ 
+ x_1_o=1.0Q0/6.0Q0*(a+4.0Q0*d+e)
+
+ a=h*f2(x_1_i,x_2_i,x_3_i,t);
+ b=h*f2(x_1_i,x_2_i+1.0Q0/3.0Q0*a,x_3_i,t+1.0Q0/3.0Q0*h);
+ c=h*f2(x_1_i,x_2_i+1.0Q0/6.0Q0*(a+b),x_3_i,t+1.0Q0/3.0Q0*h);
+ d=h*f2(x_1_i,x_2_i+1.0Q0/8.0Q0*(a+3.0Q0*c),x_3_i,t+1.0Q0/2.0Q0*h);
+ e=h*f2(x_1_i,x_2_i+1.0Q0/2.0Q0*(a-3.0Q0*c+4*d),x_3_i,t+h);
+  x_2_o=1.0Q0/6.0Q0*(a+2.0Q0*b+2.0Q0*c+d)
+ 
+  a=h*f3(x_1_i,x_2_i,x_3_i,t);
+ b=h*f3(x_1_i,x_2_i,x_3_i+1.0Q0/3.0Q0*a,t+1.0Q0/3.0Q0*h);
+ c=h*f3(x_1_i,x_2_i,x_3_i+1.0Q0/6.0Q0*(a+b),t+1.0Q0/3.0Q0*h);
+ d=h*f3(x_1_i,x_2_i,x_3_i+1.0Q0/8.0Q0*(a+3.0Q0*c),t+1.0Q0/2.0Q0*h);
+ e=h*f3(x_1_i,x_2_i,x_3_i+1.0Q0/2.0Q0*(a-3.0Q0*c+4*d),t+h);
+  x_3_o=1.0Q0/6.0Q0*(a+2.0Q0*b+2.0Q0*c+d)
+ 
+   x_1_i=x_1_i+x_1_o
+   x_2_i=x_2_i+x_2_o
+   x_3_i=x_3_i+x_3_o
+
+end subroutine
 
 
 
@@ -419,12 +457,12 @@ open (100, FILE='datos.csv')
 do i=1,1000000
   t=h*(i-1);
 !  call solve_euler(x_1_i, x_2_i, x_3_i,t,h)
-  call solve_rk4(x_1_i(4), x_2_i(4), x_3_i(4),t,h)
+  !call solve_rk4(x_1_i(4), x_2_i(4), x_3_i(4),t,h)
  !call solve_euler_mod(x_1_i, x_2_i, x_3_i,t,h)    !!verificarlo
 ! call solve_euler_implicit(x_1_i(4), x_2_i(4), x_3_i(4),t,h)
 ! call solve_euler_trap(x_1_i, x_2_i, x_3_i,t,h)
  !call solve_trap(x_1_i(4), x_2_i(4), x_3_i(4),t,h) 
- 
+ call solve_rkm(x_1_i(4), x_2_i(4), x_3_i(4),t,h)
  call writer(i,x_1_i(4), x_2_i(4), x_3_i(4),t)
 end do
 
