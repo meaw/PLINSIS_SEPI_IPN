@@ -960,9 +960,9 @@ x_5=0.0Q0 !2.2
 x_6=0.0Q0
 ttime=0.0Q0
 
-solving_set=1
-h=0.001Q0
-root='P1\0,001\'
+solving_set=5
+h=0.0175Q0
+root='P5\0,0175\'
 
 
 
