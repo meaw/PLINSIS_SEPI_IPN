@@ -959,7 +959,7 @@ x_4=0.0Q0  !1.1
 x_5=0.0Q0 !2.2
 x_6=0.0Q0
 ttime=0.0Q0
-
+!!Cambiar Estos datos de acuerdo al problema a resolver
 solving_set=5
 h=0.0175Q0
 root='P5\0,0175\'
@@ -992,7 +992,7 @@ if (solving_set==5) then
 x_1=1.0Q0  !1.1
 x_2=-1.0Q0  !1.1
 ttime=3.0Q0
-end if
+end ifr
 
 
 titer=ttime/h;
